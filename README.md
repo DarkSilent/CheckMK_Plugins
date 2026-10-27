@@ -8,7 +8,7 @@ GitHub Actions.
 
 | Paket | Beschreibung | Checkmk |
 |---|---|---|
-| [ssh_keys](ssh_keys/) | Prüft `authorized_keys` gegen eine Liste erlaubter SSH-Keys | 2.3.0p52 – 2.4.0 |
+| [ssh_keys](ssh_keys/) | Prüft `authorized_keys` gegen eine Liste erlaubter SSH-Keys | 2.3.0p52 – 2.4.x |
 
 ## Aufbau
 
@@ -21,6 +21,7 @@ GitHub Actions.
     ├── README.md
     ├── agent_based/              → ~/local/lib/check_mk/base/plugins/agent_based/
     ├── agents/                   → ~/local/share/check_mk/agents/
+    ├── cmk_addons_plugins/       → ~/local/lib/python3/cmk_addons/plugins/
     ├── checks/                   → ~/local/share/check_mk/checks/
     └── web/                      → ~/local/share/check_mk/web/
 ```
@@ -37,16 +38,16 @@ im MKP. Die Dateiliste (`files`) wird beim Build automatisch erzeugt.
   "title": "SSH-Key Check",
   "name": "ssh_keys",
   "description": "…",
-  "version": "1.0.0",
-  "version.packaged": "2.3.0p52",
+  "version": "2.0.0",
+  "version.packaged": "2.4.0",
   "version.min_required": "2.3.0p52",
-  "version.usable_until": "2.4.0",
   "author": "…",
   "download_url": "https://github.com/DarkSilent/CheckMK_Plugins"
 }
 ```
 
-`name` muss dem Ordnernamen entsprechen.
+`name` muss dem Ordnernamen entsprechen. `version.usable_until` ist optional
+und gilt exklusiv: `"2.4.0"` sperrt das Paket bereits auf 2.4.0.
 
 ## Lokal bauen
 
@@ -68,8 +69,8 @@ nutzt den Zeitstempel des letzten Commits).
   Tag `<paket>-v<version>` pushen:
 
   ```bash
-  git tag ssh_keys-v1.0.0
-  git push origin ssh_keys-v1.0.0
+  git tag ssh_keys-v2.0.0
+  git push origin ssh_keys-v2.0.0
   ```
 
   Der Workflow prüft, dass Tag und `package.json` übereinstimmen, baut nur
@@ -81,6 +82,6 @@ GUI: *Setup → Maintenance → Extension packages → Upload package*, danach
 aktivieren. Oder auf der Kommandozeile als Site-User:
 
 ```bash
-mkp add ssh_keys-1.0.0.mkp
-mkp enable ssh_keys 1.0.0
+mkp add ssh_keys-2.0.0.mkp
+mkp enable ssh_keys 2.0.0
 ```

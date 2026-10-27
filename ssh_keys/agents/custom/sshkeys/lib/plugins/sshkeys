@@ -11,8 +11,11 @@ format_keys() {
 }
 
 # Ausgabe der Root-Keys
-root_keys=$(cat /root/.ssh/authorized_keys)
-root_keys=$(format_keys "$root_keys")
+root_keys=""
+if [ -f /root/.ssh/authorized_keys ]; then
+    root_keys=$(cat /root/.ssh/authorized_keys)
+    root_keys=$(format_keys "$root_keys")
+fi
 echo "root $root_keys"
 
 # Durchsuche das /etc/passwd-Verzeichnis nach Benutzern
