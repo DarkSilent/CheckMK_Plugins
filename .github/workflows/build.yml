@@ -1,0 +1,78 @@
+name: Build MKP packages
+
+on:
+  push:
+    branches: [main]
+    tags: ["*-v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile Python sources
+        run: |
+          find . -name '*.py' -not -path './.git/*' -print0 \
+            | xargs -0 python -m py_compile
+
+      - name: ShellCheck agent plugins
+        run: |
+          files=$(grep -rlE '^#!.*\b(ba)?sh\b' */agents 2>/dev/null || true)
+          if [ -n "$files" ]; then
+            echo "$files"
+            # errors only: the plugins are kept as shipped, style warnings are not fatal
+            shellcheck --severity=error $files
+          fi
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build packages
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            python tools/build_mkp.py --check-tag "${GITHUB_REF_NAME}"
+          else
+            python tools/build_mkp.py
+          fi
+          ls -l dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mkp-packages
+          path: dist/*.mkp
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: mkp-packages
+          path: dist
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.mkp
+          generate_release_notes: true

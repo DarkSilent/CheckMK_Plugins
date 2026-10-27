@@ -1,0 +1,11 @@
+{
+  "title": "SSH-Key Check",
+  "name": "ssh_keys",
+  "description": "Checks the authorized_keys of root and all users (UID >= 1000) against a list of allowed SSH keys.",
+  "version": "1.0.0",
+  "version.packaged": "2.3.0p52",
+  "version.min_required": "2.3.0p52",
+  "version.usable_until": "2.4.0",
+  "author": "cmkadmin",
+  "download_url": "https://github.com/DarkSilent/CheckMK_Plugins"
+}

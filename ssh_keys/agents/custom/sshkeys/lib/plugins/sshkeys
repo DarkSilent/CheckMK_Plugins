@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo "<<<ssh_keys>>>"
+
+# Funktion, um Schlüssel zu formatieren
+format_keys() {
+    keys=$1
+    keys=${keys//\"/\'}
+    keys=${keys//$'\n'/';'}
+    echo "$keys"
+}
+
+# Ausgabe der Root-Keys
+root_keys=$(cat /root/.ssh/authorized_keys)
+root_keys=$(format_keys "$root_keys")
+echo "root $root_keys"
+
+# Durchsuche das /etc/passwd-Verzeichnis nach Benutzern
+while IFS=: read -r username _ uid gid _ home shell; do
+    if [ "$uid" -ge 1000 ] && [ -d "$home" ]; then
+        authorized_keys="$home/.ssh/authorized_keys"
+        user_keys=""
+
+        # Überprüfe, ob die authorized_keys-Datei für den Benutzer existiert
+        if [ -f "$authorized_keys" ]; then
+            user_keys=$(cat "$authorized_keys")
+            user_keys=$(format_keys "$user_keys")
+        fi
+
+        echo "$username $user_keys"
+    fi
+done < /etc/passwd
